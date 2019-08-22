@@ -1,4 +1,4 @@
-const express=require('express');
+const express= require('express');
 var bodyParser = require('body-parser');
 const Mongoose = require("mongoose");
 var request = require('request');
@@ -6,36 +6,29 @@ var request = require('request');
 var app=express();
 let Schema=Mongoose.Schema;
 
-var studentSchema = new Schema({
-    firstname: {type: String },
-    lastname: {type: String },
-    admno:{type: String }
-});
+const studentSchema = new Schema({
+    name : String,
+    roll_no : String,
+    class :  String
+  })
 
-var StudentModel = Mongoose.model('studentdetails', studentSchema);
+var StudentModel = Mongoose.model('students', studentSchema);
 
-var markSchema = new Schema({
-    studentid:{type:Mongoose.Schema.Types.ObjectId,ref: 'studentdetails'},
-    markObtained:{type:Number},
-    totalMark:{type:Number}
-//   name:  String,
-//   taxDetails: [{ type: Schema.Types.ObjectId, ref: 'taxDetail' }]
-});
+const markSchema = new Schema({
+    student : {
+      type : Mongoose.Schema.Types.ObjectId,
+      ref : 'students'
+    },
+    mark_physics : String,
+    mark_chemistry : String,
+    mark_biology : String
+  })
+  
 
 var markModel = Mongoose.model('marks', markSchema);
 
 
-// const StudentModel = Mongoose.model("studentdetails", {
-//     firstname: {type: String },
-//     lastname: {type: String },
-//     admno:{type: String }
-// });
-// const markModel = Mongoose.model("marks",{
-//     studentid:{type:Mongoose.Schema.Types.ObjectId,ref: 'studentdetails'},
-//     markObtained:{type:Number},
-//     totalMark:{type:Number}
 
-// })
 
 
 app.set('view engine', 'ejs');
@@ -47,17 +40,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //mongodb+srv://anishsnair:<password>@cluster0-rqfpy.mongodb.net/test?retryWrites=true&w=majority
-Mongoose.connect("mongodb://localhost/newTestCollegeDb");
+Mongoose.connect("mongodb://localhost/anish");
 //Mongoose.connect("mongodb+srv://anishsnair:hello12345@cluster0-rqfpy.mongodb.net/test?retryWrites=true&w=majority");
 
 
 app.get("/getmarks", async (request, response) => {
-    try {
-        var result = await markModel.find({}).populate('studentdetails');
-        response.send(result);
-    } catch (error) {
-        response.status(500).send(error);
-    }
+    let result = await markModel.find().populate('student')
+    response.send(result)
 });
 
 app.get("/getstudents", async (request, response) => {
@@ -69,31 +58,26 @@ app.get("/getstudents", async (request, response) => {
     }
 });
 
-app.post("/addstudents",(req,res)=>{
-    try {
-        var person = new StudentModel(req.body);
-        var result =  person.save(result,(error,data)=>{
-            if(error){ throw error;}
-            res.send(data);
-        } );
-       
-    } catch (error) {
-        res.status(500).send(error);
-    }
+app.post("/addmarks", async (req,res)=>{
+    let _mark = new markModel({
+        student : req.body.student_id,
+        mark_physics : req.body.mark_physics,
+        mark_biology : req.body.mark_biology,
+        mark_chemistry : req.body.mark_chemistry,
+      })
+      let result = await _mark.save()
+      res.send(result)
 })
 
 
-app.post("/addmarks",(req,res)=>{
-    try {
-        var person = new markModel(req.body);
-        var result =  person.save(result,(error,data)=>{
-            if(error){ throw error;}
-            res.send(data);
-        } );
-       
-    } catch (error) {
-        res.status(500).send(error);
-    }
+app.post("/addstudents",async (req,res)=>{
+    let _student = new StudentModel({
+        name : req.body.name,
+        roll_no : req.body.roll_no,
+        class : req.body.class
+      })
+      let result = await _student.save()
+      res.send(result)
 })
 
 
