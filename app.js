@@ -4,18 +4,38 @@ const Mongoose = require("mongoose");
 var request = require('request');
 
 var app=express();
+let Schema=Mongoose.Schema;
 
-const StudentModel = Mongoose.model("studentdetails", {
+var studentSchema = new Schema({
     firstname: {type: String },
     lastname: {type: String },
     admno:{type: String }
 });
-const markModel = Mongoose.model("marks",{
+
+var StudentModel = Mongoose.model('studentdetails', studentSchema);
+
+var markSchema = new Schema({
     studentid:{type:Mongoose.Schema.Types.ObjectId,ref: 'studentdetails'},
     markObtained:{type:Number},
     totalMark:{type:Number}
+//   name:  String,
+//   taxDetails: [{ type: Schema.Types.ObjectId, ref: 'taxDetail' }]
+});
 
-})
+var markModel = Mongoose.model('marks', markSchema);
+
+
+// const StudentModel = Mongoose.model("studentdetails", {
+//     firstname: {type: String },
+//     lastname: {type: String },
+//     admno:{type: String }
+// });
+// const markModel = Mongoose.model("marks",{
+//     studentid:{type:Mongoose.Schema.Types.ObjectId,ref: 'studentdetails'},
+//     markObtained:{type:Number},
+//     totalMark:{type:Number}
+
+// })
 
 
 app.set('view engine', 'ejs');
@@ -27,13 +47,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //mongodb+srv://anishsnair:<password>@cluster0-rqfpy.mongodb.net/test?retryWrites=true&w=majority
-Mongoose.connect("mongodb://localhost/TestCollegeDb");
+Mongoose.connect("mongodb://localhost/newTestCollegeDb");
 //Mongoose.connect("mongodb+srv://anishsnair:hello12345@cluster0-rqfpy.mongodb.net/test?retryWrites=true&w=majority");
 
 
 app.get("/getmarks", async (request, response) => {
     try {
-        var result = await markModel.find().populate('studentdetails');
+        var result = await markModel.find({}).populate('studentdetails');
         response.send(result);
     } catch (error) {
         response.status(500).send(error);
